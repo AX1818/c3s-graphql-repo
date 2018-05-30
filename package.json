@@ -1,0 +1,8 @@
+{
+  "name": "c3s-graphql-repo",
+  "version": "1.0.0",
+  "description": "graphql serverless repo for c3s",
+  "main": "handler.js",
+  "author": "Austin Xie",
+  "license": "MIT"
+}
