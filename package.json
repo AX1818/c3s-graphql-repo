@@ -4,5 +4,16 @@
   "description": "graphql serverless repo for c3s",
   "main": "handler.js",
   "author": "Austin Xie",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.248.1",
+    "graphql": "^0.13.2",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "jest": "^23.1.0"
+  }
 }
