@@ -24,9 +24,8 @@ module.exports.schema = buildSchema(`
 
   input ClotheInput {
     Id: String!
-    Type: ClotheType!
     Code: String
-    Timestamp: String!
+    Timestamp: String
     State: ClotheState!
   }
 
@@ -66,5 +65,7 @@ module.exports.schema = buildSchema(`
   type Mutation {
     addTag(Code: String!): Tag
     tagClothes(tagId: String!, clotheIds: [String!]): [ClotheTag]
+    updateClothe(clothe: ClotheInput): Clothe
+    updateTag(tag: TagInput): Tag
   }
 `);

@@ -5,22 +5,11 @@ const uuidv4 = require('uuid/v4');
 const Clothe = require('./Clothe');
 const Tag = require('./Tag');
 
-const {
-  dynamoDb,
-  paramTable
-} = require('../services/dbclient');
-const {
-  promisify
-} = require('../services');
+const { dynamoDb, paramTable } = require('../services/dbclient');
+const { promisify } = require('../services');
 
 module.exports.resolvers = {
-  async clothes({
-    Ids
-  }) {
-    console.log('*****ids: ', Ids);
-    Ids.sort();
-    const minId = Ids[0];
-    const maxId = Ids[Ids.length - 1];
+  async clothes({ Ids }) {
     const params = {
       TableName: paramTable.TableName,
       ScanFilter: {
@@ -35,13 +24,8 @@ module.exports.resolvers = {
       }
     };
 
-    console.log('dynammo params: ', JSON.stringify(params));
-    const cloeths = await promisify(callback => dynamoDb.scan(params, callback))
-      .then(result => {
-        console.log(result.Items);
-        return result.Items;
-      });
-    return cloeths;
+    return await promisify(callback => dynamoDb.scan(params, callback))
+      .then( (result) => result.Items );
   },
 
   async clothe({ Id }) {
@@ -63,19 +47,16 @@ module.exports.resolvers = {
     };
 
     return promisify(callback => dynamoDb.put(params, callback))
-      .then(result => {
-        console.log("result: ", result);
-        return params.Item;
-      });
+      .then(result => params.Item);
   },
 
   async tagClothes({ tagId, clotheIds }) {
     const clothes = await this.clothes({
       Ids: clotheIds
     });
-    console.log('fetched clothes: ', JSON.stringify(clothes, null, 2));
-    const tag = await this.tag({ Id: tagId });
-    console.log('fetched tag: ', JSON.stringify(tag, null, 2));
+    const tag = await this.tag({
+      Id: tagId
+    });
     const promises = clothes.map((clothe) => {
       const params = {
         TableName: paramTable.TableName,
@@ -87,17 +68,55 @@ module.exports.resolvers = {
         }
       };
 
-      console.log('params: ', JSON.stringify(params, null, 2));
       return promisify(callback => dynamoDb.put(params, callback))
-        .then(result => {
-          console.log(" params.Item: ", JSON.stringify( params.Item));
-          return params.Item;
-        });
+        .then(result => params.Item);
     });
-    return Promise.all(promises).then((results) => {
-      console.debug('Param Items: ', JSON.stringify(results, null, 2));
-      return results;
-    });
+
+    return Promise.all(promises);
+  },
+
+  async updateClothe({ clothe }) {
+    const { Id, Code, Timestamp, State } = clothe;
+    const params = {
+      TableName: paramTable.TableName,
+      Key: { Id },
+      AttributeUpdates: {
+        'State': {
+          Action: 'PUT',
+          Value: State
+        },
+        'Code': {
+          Action: 'PUT',
+          Value: Code
+        },
+        'Timestamp': {
+          Action: 'PUT',
+          Value: Timestamp
+        }
+      },
+      ReturnValues: 'UPDATED_OLD'
+    };
+
+    return promisify(callback => dynamoDb.update(params, callback))
+      .then( () => this.clothe({ Id }) );
+  },
+
+  async updateTag({ tag }) {
+    const { Id, Code } = tag;
+    const params = {
+      TableName: paramTable.TableName,
+      Key: {
+        Id
+      },
+      UpdateExpression: 'set Code = :newCode',
+      ExpressionAttributeValues: {
+        ':newCode': Code
+      },
+      ReturnValues: 'UPDATED_OLD'
+    };
+
+    return promisify(callback => dynamoDb.update(params, callback))
+      .then( (tag) => this.tag({ Id }) );
   }
 
 }
