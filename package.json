@@ -6,7 +6,7 @@
   "author": "Austin Xie",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest --detectOpenHandles"
   },
   "dependencies": {
     "aws-sdk": "^2.248.1",

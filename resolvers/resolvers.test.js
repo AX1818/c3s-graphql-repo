@@ -1,7 +1,4 @@
-const {
-  graphql,
-  buildSchema
-} = require('graphql');
+const { graphql, buildSchema } = require('graphql');
 
 const {schema} = require('../schema');
 const {resolvers} = require('./index');
@@ -28,15 +25,22 @@ test('test get clothe by Id', ()=> {
     clothe(Id: "20130301_131132") {
       Id
       Type
-      Code
       State
       Timestamp
+      ClotheTags {
+        Id
+        Type
+        TagCode
+        ClotheCode
+      }
+
     }
   }`,
   resolvers).then(clothes => {
     console.log('Clothe: ', JSON.stringify(clothes));
   });
 });
+
 
 test('test get Tag by Id', ()=> {
   graphql(schema, `query { 
@@ -51,6 +55,9 @@ test('test get Tag by Id', ()=> {
   });
 });
 
+
+
+/*
 test('test Tagging Clothe by Ids', ()=> {
   graphql(schema, `mutation { 
     tagClothes(tagId: "d76e41ac-677f-424c-b348-0cbacdf15dae", clotheIds: ["20130301_131132", "DSC_0380"]) {
@@ -64,6 +71,7 @@ test('test Tagging Clothe by Ids', ()=> {
     console.log('ClotheTags: ', JSON.stringify(clothes));
   });
 });
+*/
 
 /*
 test('test adding Tag', ()=> {

@@ -1,23 +1,42 @@
 'use strict';
 
-const dynamoDb, { paramTable} = require('../services/dbclient');
-const promisify = require('../services');
+const { dynamoDb, paramTable } = require('../services/dbclient');
+const { promisify } = require('../services');
+
+const item = require('./Item');
+
+// async function item(Id) {
+//   const params = {
+//     TableName: paramTable.TableName,
+//     KeyConditionExpression: 'Id = :Id',
+//     ExpressionAttributeValues: {
+//       ':Id': Id
+//     }
+//   };
+
+//   return await promisify(callback => dynamoDb.query(params, callback))
+//     .then(result => {
+//       return result.Items[0];
+//     });
+// }
 
 class Clothe {
   constructor(Id) {
-    this.Id = id;
+    this.Id = Id;
+    return item(Id).then(clothe => {
+      Object.assign(this, clothe);
+      return this;
+    });
   }
 
-  Tags() {
+  ClotheTags() {
     const params = {
       ...paramTable,
-      KeyConditions: {
+      ScanFilter: {
         'Id': {
-          ComparisonOperator: ' BEGINS_WITH',
-          AttributeValueList: [`${this.Id}:`]
-        }
-      },
-      QueryFilter: {
+          ComparisonOperator: 'BEGINS_WITH',
+          AttributeValueList: [`${this.Id}|`]
+        },
         'Type': {
           ComparisonOperator: 'EQ',
           AttributeValueList: ['CT']
@@ -25,12 +44,11 @@ class Clothe {
       }
     };
 
-    console.log('dynammo params: ', JSON.stringify(params));
-    return promisify(callback => dynamoDb.query(params, callback))
+    return promisify(callback => dynamoDb.scan(params, callback))
     .then(result => {
-      console.log(result.Items); 
       return result.Items;
     });
-  }
-                                                  
+  }                                              
 }
+
+module.exports = Clothe;

@@ -2,6 +2,9 @@
 
 const uuidv4 = require('uuid/v4');
 
+const Clothe = require('./Clothe');
+const Tag = require('./Tag');
+
 const {
   dynamoDb,
   paramTable
@@ -9,22 +12,6 @@ const {
 const {
   promisify
 } = require('../services');
-
-async function item(Id) {
-  const params = {
-    TableName: paramTable.TableName,
-    KeyConditionExpression: 'Id = :Id',
-    ExpressionAttributeValues: {
-      ':Id': Id
-    }
-  };
-
-  const item = await promisify(callback => dynamoDb.query(params, callback))
-    .then(result => {
-      return result.Items[0];
-    });
-  return item;
-}
 
 module.exports.resolvers = {
   async clothes({
@@ -57,21 +44,15 @@ module.exports.resolvers = {
     return cloeths;
   },
 
-  async clothe({
-    Id
-  }) {
-    return item(Id);
+  async clothe({ Id }) {
+    return new Clothe(Id);
   },
 
-  async tag({
-    Id
-  }) {
-    return item(Id);
+  async tag({ Id }) {
+    return new Tag(Id);
   },
 
-  async addTag({
-    Code
-  }) {
+  addTag({ Code }) {
     const params = {
       TableName: paramTable.TableName,
       Item: {
@@ -88,40 +69,33 @@ module.exports.resolvers = {
       });
   },
 
-  async tagClothes({
-    tagId,
-    clotheIds
-  }) {
+  async tagClothes({ tagId, clotheIds }) {
     const clothes = await this.clothes({
       Ids: clotheIds
     });
     console.log('fetched clothes: ', JSON.stringify(clothes, null, 2));
-    const tag = await this.tag({
-      Id: tagId
-    });
+    const tag = await this.tag({ Id: tagId });
     console.log('fetched tag: ', JSON.stringify(tag, null, 2));
     const promises = clothes.map((clothe) => {
       const params = {
         TableName: paramTable.TableName,
         Item: {
-          Id: `${clothe.Id}:${tagId}`,
+          Id: `${clothe.Id}|${tagId}`,
           Type: 'CT',
-          ClotheCode: clothe.Code,
-          TagCode: tag.Code
+          TagCode: tag.Code,
+          ClotheCode: clothe.Code
         }
       };
 
       console.log('params: ', JSON.stringify(params, null, 2));
       return promisify(callback => dynamoDb.put(params, callback))
         .then(result => {
-          console.log("result: ", result);
+          console.log(" params.Item: ", JSON.stringify( params.Item));
           return params.Item;
         });
     });
-    console.log('promises: ', JSON.stringify(promises, null, 2));
-
     return Promise.all(promises).then((results) => {
-      console.log('results: ', JSON.stringify(results, null, 2));
+      console.debug('Param Items: ', JSON.stringify(results, null, 2));
       return results;
     });
   }

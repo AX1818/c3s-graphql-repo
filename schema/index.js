@@ -1,9 +1,6 @@
 'use strict';
 
-const {
-  graphql,
-  buildSchema
-} = require('graphql');
+const { graphql, buildSchema } = require('graphql');
 
 module.exports.schema = buildSchema(` 
   enum ClotheType {
@@ -44,7 +41,7 @@ module.exports.schema = buildSchema(`
     Code: String
     Timestamp: String!
     State: ClotheState!
-    Tags: [Tag]
+    ClotheTags: [ClotheTag]
   }
 
   type Tag {
