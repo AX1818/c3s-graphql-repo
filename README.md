@@ -27,6 +27,8 @@
 
 - Dev: ***`https://oocl8wa668.execute-api.ap-southeast-2.amazonaws.com/dev/graphqlQuery`***
 
+### [GraphQL and Authentication](https://medium.com/the-graphqlhub/graphql-and-authentication-b73aed34bbeb)
+
 ### Sample Tests
 
 #### Query Tag by Id
