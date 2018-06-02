@@ -28,6 +28,48 @@ module.exports.resolvers = {
       .then( (result) => result.Items );
   },
 
+  async clothesByDates({ dates }) {
+    const [fromDate, toDate] = dates;
+    console.log({ fromDate, toDate });
+    const params = {
+      TableName: paramTable.TableName,
+      ScanFilter: {
+        'Type': {
+          ComparisonOperator: 'EQ',
+          AttributeValueList: 'C'
+        }
+      }
+    };
+
+    if (fromDate && toDate) {
+      Object.assign(params.ScanFilter, {
+        'Timestamp': {
+          ComparisonOperator: 'BETWEEN',
+          AttributeValueList: [fromDate, toDate]
+        }
+      });
+    } else if (fromDate) {
+      Object.assign(params.ScanFilter, {
+        'Timestamp': {
+          ComparisonOperator: 'GE',
+          AttributeValueList: [fromDate]
+        }
+      });
+    } else if (toDate) {
+      Object.assign(params.ScanFilter, {
+        'Timestamp': {
+          ComparisonOperator: 'LE',
+          AttributeValueList: [toDate]
+        }
+      });
+    }
+
+    console.log(`params: ${JSON.stringify(params, null, 2)}`);
+
+    return await promisify(callback => dynamoDb.scan(params, callback))
+      .then( (result) => result.Items );
+  },
+
   async clothe({ Id }) {
     return new Clothe(Id);
   },

@@ -58,6 +58,7 @@ module.exports.schema = buildSchema(`
 
   type Query {
     clothes(Ids: [String]): [Clothe]
+    clothesByDates(dates: [String]): [Clothe]
     clothe(Id: String!): Clothe
     tag(Id: String!): Tag
   }

@@ -20,6 +20,24 @@ test('test resolving clothes and its schema', ()=> {
 });
 
 
+test('test resolving clothes and its schema', ()=> {
+  graphql(schema, `query { 
+    clothesByDates(dates: ["2018-05-31"]) {
+      Id
+      Type
+      Code
+      State
+      Timestamp
+    }
+  }`,
+  resolvers).then(clothes => {
+    console.log('clothes: ', JSON.stringify(clothes));
+  });
+});
+
+
+
+/*
 test('test get clothe by Id', ()=> {
   graphql(schema, `query { 
     clothe(Id: "20130301_131132") {
@@ -70,7 +88,7 @@ test('test Update Tag', ()=> {
   });
 });
 
-test('test get Tag by Id', ()=> {
+test('test query Tag by Id', ()=> {
   graphql(schema, `query { 
     tag(Id: "d76e41ac-677f-424c-b348-0cbacdf15dae") {
       Id
@@ -109,3 +127,4 @@ test('test adding Tag', ()=> {
     console.log('Tag: ', JSON.stringify(tag));
   });
 });
+*/
